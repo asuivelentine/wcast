@@ -6,14 +6,6 @@ use hyper::Client;
 use hyper::header::Connection;
 
 type Result<T> = RResult<T, WGError>;
-//fn foo() -> Result<Weather>
-
-#[derive(Debug)]
-pub enum LocationInformation {
-    Coord { lat: String, lng: String },
-    City { city: String, country: String },
-    Zip { zip: String, country: String },
-}
 
 #[derive(Debug)]
 pub enum ErrorKind {
@@ -31,7 +23,6 @@ pub struct WeatherGather {
 }
 
 impl WeatherGather {
-
     pub fn new(apikey: String) -> WeatherGather {
         WeatherGather {
             apiKey: apikey,
@@ -49,8 +40,15 @@ impl WeatherGather {
 
 }
 
+#[derive(Debug)]
+pub enum LocationInformation {
+    Coord { lat: f64, lng: f64},
+    City { city: String, country: String },
+    Zip { zip: String, country: String },
+}
+
 impl LocationInformation {
-    pub fn from_coords(lat: String, lng: String) -> LocationInformation {
+    pub fn from_coords(lat: f64, lng: f64) -> LocationInformation {
        LocationInformation::Coord {
            lat: lat,
            lng: lng

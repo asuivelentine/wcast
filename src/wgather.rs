@@ -8,12 +8,6 @@ use hyper::header::Connection;
 type Result<T> = RResult<T, WGError>;
 //fn foo() -> Result<Weather>
 
-
-#[derive(Debug)]
-pub struct ApiKey {
-    pub apiKey: String,
-}
-
 #[derive(Debug)]
 pub enum LocationInformation {
     Coord { lat: String, lng: String },
@@ -32,8 +26,26 @@ pub struct WGError {
     cause: Option<Box<::std::error::Error>>,
 }
 
-impl ApiKey {
+pub struct WeatherGather {
+    apiKey: String,
+}
 
+impl WeatherGather {
+
+    pub fn new(apikey: String) -> WeatherGather {
+        WeatherGather {
+            apiKey: apikey,
+        }
+    }
+
+    pub fn get_weather(&self, li: LocationInformation) -> Result<WeatherInfo> {
+        match li {
+            LocationInformation::Coord{ lat: lat, lng: lng } => println!("hjer"),
+            LocationInformation::City{ city: city, country: country } => println!("hjer"),
+            LocationInformation::Zip{ zip: zip, country: country } => println!("hjer"),
+        };
+        Ok(WeatherInfo::new())
+    }
 
 }
 

@@ -1,3 +1,4 @@
+use std::io::Read;
 use std::result::Result as RResult;
 
 use winfo::WeatherInfo;
@@ -92,7 +93,7 @@ impl WeatherGetter {
         Ok(WeatherInfo::new())
     }
 
-    pub fn get_rss_feed(url: &str) -> String{
+    pub fn fetch_weather_data(url: &str) -> String{
         let client = Client::new();
 
         let mut res = client.get(url)
@@ -100,7 +101,7 @@ impl WeatherGetter {
             .send().unwrap();
 
         let mut body = String::new();
-        //res.read_to_string(&mut body).unwrap();
+        res.read_to_string(&mut body).unwrap();
         body
     }
 }

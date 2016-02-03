@@ -68,7 +68,40 @@ impl WeatherGetter {
     }
 
     pub fn get(self) -> Result<WeatherInfo> {
+        let mut uri = "http://api.openweathermap.org/data/2.5/weather?".to_string();
+        let locatoin = match self.li {
+            LocationInformation::Coord{ lat: lat, lng: lng } => {
+                let mut tmp = "?lat=".to_string();
+                tmp = tmp + &lat.to_string();
+                tmp = tmp + "&lon=";
+                tmp = tmp + &lng.to_string();
+            }
+            LocationInformation::City{ city: city, country: country } => {
+                let mut tmp = "?q=".to_string();
+                tmp = tmp + &city;
+                tmp = tmp + ",";
+                tmp = tmp + &country;
+            }
+            LocationInformation::Zip{ zip: zip, country: country } => {
+                let mut tmp = "?q=".to_string();
+                tmp = tmp + &zip;
+                tmp = tmp + ",";
+                tmp = tmp + &country;
+            }
+        };
         Ok(WeatherInfo::new())
+    }
+
+    pub fn get_rss_feed(url: &str) -> String{
+        let client = Client::new();
+
+        let mut res = client.get(url)
+            .header(Connection::close())
+            .send().unwrap();
+
+        let mut body = String::new();
+        //res.read_to_string(&mut body).unwrap();
+        body
     }
 }
 

@@ -6,6 +6,10 @@ use hyper::Client;
 use hyper::header::Connection;
 
 type Result<T> = RResult<T, WGError>;
+type Language = String;
+type Location = String;
+type Forecast = bool;
+
 
 #[derive(Debug)]
 pub enum ErrorKind {
@@ -29,16 +33,45 @@ impl WeatherGather {
         }
     }
 
-    pub fn get_weather(&self, li: LocationInformation) -> Result<WeatherInfo> {
-        match li {
-            LocationInformation::Coord{ lat: lat, lng: lng } => println!("hjer"),
-            LocationInformation::City{ city: city, country: country } => println!("hjer"),
-            LocationInformation::Zip{ zip: zip, country: country } => println!("hjer"),
-        };
-        Ok(WeatherInfo::new())
+    pub fn get_weather(&self, li: LocationInformation) -> WeatherGetter {
+        WeatherGetter {
+            li: LocationInformation::from_coords(52.5243700, 13.4105300),
+            lang: String::new(),
+            loc: String::new(),
+            forecast: false,
+        }
+    }
+}
+
+
+pub struct WeatherGetter {
+    li: LocationInformation,
+    lang: Language,
+    loc: Location,
+    forecast: Forecast,
+}
+
+impl WeatherGetter {
+    pub fn with_location(mut self, loc: Location) -> WeatherGetter {
+        self.loc = loc;
+        self
     }
 
+    pub fn with_language(mut self, lang: Language) -> WeatherGetter {
+        self.lang = lang;
+        self
+    }
+
+    pub fn with_forcase(mut self, forecast: Forecast) -> WeatherGetter {
+        self.forecast = forecast;
+        self
+    }
+
+    pub fn get(self) -> Result<WeatherInfo> {
+        Ok(WeatherInfo::new())
+    }
 }
+
 
 #[derive(Debug)]
 pub enum LocationInformation {

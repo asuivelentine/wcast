@@ -23,20 +23,21 @@ pub struct WGError {
     cause: Option<Box<::std::error::Error>>,
 }
 
+#[dervie(Debug)]
 pub struct WeatherGather {
-    apiKey: String,
+    api_key: String,
 }
 
 impl WeatherGather {
     pub fn new(apikey: String) -> WeatherGather {
         WeatherGather {
-            apiKey: apikey,
+            api_key: apikey,
         }
     }
 
     pub fn get_weather(&self, li: LocationInformation) -> WeatherGetter {
         WeatherGetter {
-            li: LocationInformation::from_coords(52.5243700, 13.4105300),
+            li: li,
             lang: String::new(),
             loc: String::new(),
             forecast: false,
@@ -45,6 +46,7 @@ impl WeatherGather {
 }
 
 
+#[derive(Debug)]
 pub struct WeatherGetter {
     li: LocationInformation,
     lang: Language,
@@ -69,31 +71,41 @@ impl WeatherGetter {
     }
 
     pub fn get(self) -> Result<WeatherInfo> {
-        let mut uri = "http://api.openweathermap.org/data/2.5/weather?".to_string();
-        let locatoin = match self.li {
-            LocationInformation::Coord{ lat: lat, lng: lng } => {
+        let mut uri = match self.forecast {
+            true => "http://api.openweathermap.org/data/2.5/forecast?".to_string(),
+            false => "http://api.openweathermap.org/data/2.5/weather?".to_string(),
+        };
+
+        let location = match self.li {
+            LocationInformation::Coord{ lat, lng } => { 
+                //location = format!("?lat={}&lon={}", lat.to_string(), lng.to_string()),
                 let mut tmp = "?lat=".to_string();
                 tmp = tmp + &lat.to_string();
                 tmp = tmp + "&lon=";
                 tmp = tmp + &lng.to_string();
             }
-            LocationInformation::City{ city: city, country: country } => {
+            LocationInformation::City{ city, country } => {
                 let mut tmp = "?q=".to_string();
                 tmp = tmp + &city;
                 tmp = tmp + ",";
                 tmp = tmp + &country;
             }
-            LocationInformation::Zip{ zip: zip, country: country } => {
-                let mut tmp = "?q=".to_string();
+            LocationInformation::Zip{ zip, country  } => {
+                let mut tmp = "?zip=".to_string();
                 tmp = tmp + &zip;
                 tmp = tmp + ",";
                 tmp = tmp + &country;
             }
         };
+        //uri = uri + &location;
+        uri = uri + "&mode=xml";
+        
+
+        let xml = WeatherGetter::fetch_weather_data(&uri);
         Ok(WeatherInfo::new())
     }
 
-    pub fn fetch_weather_data(url: &str) -> String{
+    fn fetch_weather_data(url: &str) -> String{
         let client = Client::new();
 
         let mut res = client.get(url)

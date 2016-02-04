@@ -2,6 +2,9 @@
 name = "wcast"
 version = "0.1.0"
 authors = ["Kai Sickeler <k.sickeler@gmail.com>"]
+description = "API to fetch weather information from openWeatherMap.org"
+homepage = "https://github.com/asuivelentine/wcast"
+repository = "https://github.com/asuivelentine/wcast"
 
 [dependencies]
 xmltree = "0.3.1"

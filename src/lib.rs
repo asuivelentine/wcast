@@ -10,8 +10,8 @@
 extern crate xmltree;
 extern crate hyper;
 
-mod wgather;
-mod winfo;
+pub mod wgather;
+pub mod winfo;
 
 #[cfg(test)]
 mod test {

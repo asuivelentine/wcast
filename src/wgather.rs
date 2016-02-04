@@ -6,9 +6,9 @@ use hyper;
 use hyper::Client;
 use hyper::header::Connection;
 
-type Result<T> = RResult<T, WGError>;
-type Language = String;
-type Forecast = bool;
+pub type Result<T> = RResult<T, WGError>;
+pub type Language = String;
+pub type Forecast = bool;
 
 
 #[derive(Debug)]

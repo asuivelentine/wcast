@@ -8,7 +8,6 @@ use hyper::header::Connection;
 
 type Result<T> = RResult<T, WGError>;
 type Language = String;
-type Location = String;
 type Forecast = bool;
 
 
@@ -35,11 +34,10 @@ impl WeatherGather {
         }
     }
 
-    pub fn get_weather(&self, li: LocationInformation) -> WeatherGetter {
+    pub fn get_weather(&self) -> WeatherGetter {
         WeatherGetter {
-            li: li,
+            li: LocationInformation::from_coords(52.5243700, 13.4105300),
             lang: String::new(),
-            loc: String::new(),
             forecast: false,
         }
     }
@@ -50,13 +48,12 @@ impl WeatherGather {
 pub struct WeatherGetter {
     li: LocationInformation,
     lang: Language,
-    loc: Location,
     forecast: Forecast,
 }
 
 impl WeatherGetter {
-    pub fn with_location(mut self, loc: Location) -> WeatherGetter {
-        self.loc = loc;
+    pub fn with_location(mut self, li: LocationInformation) -> WeatherGetter {
+        self.li = li;
         self
     }
 
@@ -70,7 +67,7 @@ impl WeatherGetter {
         self
     }
 
-    pub fn get(self) -> Result<WeatherInfo> {
+    pub fn get(self, wg: WeatherGather) -> Result<WeatherInfo> {
         let mut uri = match self.forecast {
             true => "http://api.openweathermap.org/data/2.5/forecast?".to_string(),
             false => "http://api.openweathermap.org/data/2.5/weather?".to_string(),
@@ -87,11 +84,12 @@ impl WeatherGetter {
                 format!("?zip={},{}", zip, country)
             }
         };
-        //uri = uri + &location;
-        uri = uri + "&mode=xml";
+        uri = format!("{}{}&mode=xml&lang={}", uri, location, self.lang );
+        uri = format!("&appid={}", wg.api_key);
         
 
         let xml = WeatherGetter::fetch_weather_data(&uri);
+        println!("{}", xml);
         Ok(WeatherInfo::new())
     }
 

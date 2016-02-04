@@ -23,7 +23,7 @@ pub struct WGError {
     cause: Option<Box<::std::error::Error>>,
 }
 
-#[dervie(Debug)]
+#[derive(Debug)]
 pub struct WeatherGather {
     api_key: String,
 }
@@ -78,23 +78,13 @@ impl WeatherGetter {
 
         let location = match self.li {
             LocationInformation::Coord{ lat, lng } => { 
-                //location = format!("?lat={}&lon={}", lat.to_string(), lng.to_string()),
-                let mut tmp = "?lat=".to_string();
-                tmp = tmp + &lat.to_string();
-                tmp = tmp + "&lon=";
-                tmp = tmp + &lng.to_string();
+                format!("?lat={}&lon={}", lat.to_string(), lng.to_string())
             }
             LocationInformation::City{ city, country } => {
-                let mut tmp = "?q=".to_string();
-                tmp = tmp + &city;
-                tmp = tmp + ",";
-                tmp = tmp + &country;
+                format!("?lat={}&lon={}", city, country)
             }
             LocationInformation::Zip{ zip, country  } => {
-                let mut tmp = "?zip=".to_string();
-                tmp = tmp + &zip;
-                tmp = tmp + ",";
-                tmp = tmp + &country;
+                format!("?lat={}&lon={}", zip, country)
             }
         };
         //uri = uri + &location;

@@ -81,10 +81,10 @@ impl WeatherGetter {
                 format!("?lat={}&lon={}", lat.to_string(), lng.to_string())
             }
             LocationInformation::City{ city, country } => {
-                format!("?lat={}&lon={}", city, country)
+                format!("?q={},{}", city, country)
             }
             LocationInformation::Zip{ zip, country  } => {
-                format!("?lat={}&lon={}", zip, country)
+                format!("?zip={},{}", zip, country)
             }
         };
         //uri = uri + &location;

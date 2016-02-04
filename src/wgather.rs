@@ -51,6 +51,11 @@ pub struct WeatherGetter {
     forecast: Forecast,
 }
 
+#[derive(Debug)]
+pub enum WeatherUnits {
+    
+}
+
 impl WeatherGetter {
     pub fn with_location(mut self, li: LocationInformation) -> WeatherGetter {
         self.li = li;
@@ -75,21 +80,20 @@ impl WeatherGetter {
 
         let location = match self.li {
             LocationInformation::Coord{ lat, lng } => { 
-                format!("?lat={}&lon={}", lat.to_string(), lng.to_string())
+                format!("lat={}&lon={}", lat.to_string(), lng.to_string())
             }
             LocationInformation::City{ city, country } => {
-                format!("?q={},{}", city, country)
+                format!("q={},{}", city, country)
             }
             LocationInformation::Zip{ zip, country  } => {
-                format!("?zip={},{}", zip, country)
+                format!("zip={},{}", zip, country)
             }
         };
         uri = format!("{}{}&mode=xml&lang={}", uri, location, self.lang );
-        uri = format!("&appid={}", wg.api_key);
+        uri = format!("{}&appid={}", uri, wg.api_key);
         
 
         let xml = WeatherGetter::fetch_weather_data(&uri);
-        println!("{}", xml);
         Ok(WeatherInfo::new())
     }
 

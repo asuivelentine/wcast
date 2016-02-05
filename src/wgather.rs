@@ -93,8 +93,8 @@ impl WeatherGetter {
         uri = format!("{}&appid={}", uri, wg.api_key);
         
 
-        let xml = WeatherGetter::fetch_weather_data(&uri);
-        Ok(WeatherInfo::from(xml))
+        let json = WeatherGetter::fetch_weather_data(&uri);
+        Ok(WeatherInfo::from(json))
     }
 
     fn fetch_weather_data(url: &str) -> String{

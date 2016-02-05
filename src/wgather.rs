@@ -94,7 +94,7 @@ impl WeatherGetter {
         
 
         let xml = WeatherGetter::fetch_weather_data(&uri);
-        Ok(WeatherInfo::new())
+        Ok(WeatherInfo::from(xml))
     }
 
     fn fetch_weather_data(url: &str) -> String{

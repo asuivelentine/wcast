@@ -10,8 +10,10 @@
 extern crate rustc_serialize;
 extern crate hyper;
 
+mod winfo;
 pub mod wgather;
-pub mod winfo;
+
+pub use winfo::WeatherInfo;
 
 #[cfg(test)]
 mod test {

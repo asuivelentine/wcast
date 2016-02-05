@@ -7,7 +7,7 @@
        unused_import_braces,
        unsafe_code)]
 
-extern crate xmltree;
+extern crate rustc_serialize;
 extern crate hyper;
 
 pub mod wgather;

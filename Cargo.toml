@@ -7,5 +7,5 @@ homepage = "https://github.com/asuivelentine/wcast"
 repository = "https://github.com/asuivelentine/wcast"
 
 [dependencies]
-xmltree = "0.3.1"
+rustc-serialize = "0.3"
 hyper="0.7.2"

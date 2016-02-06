@@ -5,16 +5,19 @@ use rustc_serialize::json::Json;
 
 pub type Time = u64;
 
+//temporary, until the real json data is parsed...
 #[derive(Debug)]
 pub struct WeatherInfo {
     dummy: isize,
 }
 
+#[derive(Debug)]
 pub struct WeatherInfo2 {
     city: City,
     day: Vec<Day>
 }
    
+#[derive(Debug)]
 pub struct City {
     name: String,
     country: String,
@@ -24,6 +27,7 @@ pub struct City {
     grnd_level: f64
 }
 
+#[derive(Debug)]
 pub struct Day {
     sunrise: u64,
     sunset: u64,
@@ -32,6 +36,7 @@ pub struct Day {
     weather: Vec<Weather>   
 }
 
+#[derive(Debug)]
 pub struct Weather{
     description: String,
     temp: f64,
@@ -41,6 +46,7 @@ pub struct Weather{
     when: Time
 }
 
+#[derive(Debug)]
 pub struct Wind {
     speed: f64,
     degree: f64

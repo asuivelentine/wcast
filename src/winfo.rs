@@ -1,11 +1,16 @@
 use std::convert::From;
 
 use rustc_serialize;
-use rustc_serialize::json;
+use rustc_serialize::json::Json;
 
 pub type Time = u64;
 
+#[derive(Debug)]
 pub struct WeatherInfo {
+    dummy: isize,
+}
+
+pub struct WeatherInfo2 {
     city: City,
     day: Vec<Day>
 }
@@ -51,7 +56,13 @@ impl From<String> for WeatherInfo {
 
 impl WeatherInfo {
     fn new() -> WeatherInfo {
-
+        WeatherInfo {
+            dummy: 5,
+        }
     }
 
+    pub fn print(json: &str) {
+        let data = Json::from_str(json);
+        println!("{:?}", data);
+    }
 }

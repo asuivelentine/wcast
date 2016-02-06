@@ -39,6 +39,7 @@ impl WeatherGather {
             li: LocationInformation::from_coords(52.5243700, 13.4105300),
             lang: String::new(),
             forecast: false,
+            wu: WeatherUnit::Celsius,
         }
     }
 }
@@ -49,11 +50,14 @@ pub struct WeatherGetter {
     li: LocationInformation,
     lang: Language,
     forecast: Forecast,
+    wu: WeatherUnit,
 }
 
 #[derive(Debug)]
-pub enum WeatherUnits {
-    
+pub enum WeatherUnit {
+    Kelvin,
+    Celsius,
+    Fahrenheit
 }
 
 impl WeatherGetter {
@@ -72,6 +76,11 @@ impl WeatherGetter {
         self
     }
 
+    pub fn in_units(mut self, wu: WeatherUnit) -> WeatherGetter {               
+        self.wu = wu;                                                           
+        self                                                                    
+    } 
+
     pub fn get(self, wg: WeatherGather) -> Result<WeatherInfo> {
         let mut uri = match self.forecast {
             true => "http://api.openweathermap.org/data/2.5/forecast?".to_string(),
@@ -89,12 +98,14 @@ impl WeatherGetter {
                 format!("zip={},{}", zip, country)
             }
         };
-        uri = format!("{}{}&mode=xml&lang={}", uri, location, self.lang );
+        uri = format!("{}{}&lang={}", uri, location, self.lang );
         uri = format!("{}&appid={}", uri, wg.api_key);
         
 
         let json = WeatherGetter::fetch_weather_data(&uri);
-        Ok(WeatherInfo::from(json))
+        WeatherInfo::print(&json);
+        let weather = WeatherInfo::from(json);
+        Ok(weather)
     }
 
     fn fetch_weather_data(url: &str) -> String{

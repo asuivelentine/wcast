@@ -23,8 +23,6 @@ pub struct City {
     country: String,
     lat: f64,
     lng: f64,
-    sea_level: f64,
-    grnd_level: f64
 }
 
 #[derive(Debug)]
@@ -42,8 +40,10 @@ pub struct Weather{
     temp: f64,
     humidity: u64,
     pressure: f64,
-    wind: Wind,
-    when: Time
+    sea_level: f64,
+    grnd_level: f64,
+    when: Time,
+    wind: Wind
 }
 
 #[derive(Debug)]
@@ -54,9 +54,14 @@ pub struct Wind {
 
 impl From<String> for WeatherInfo {
     fn from(json: String) -> Self {
+        let data = Json::from_str(&json).unwrap();
+        WeatherInfo::get_city(data.clone());
+
+        
         WeatherInfo {
             dummy: 5,
         }
+
     }
 }
 
@@ -65,6 +70,29 @@ impl WeatherInfo {
         WeatherInfo {
             dummy: 5,
         }
+    }
+
+    fn get_city(data: Json) -> Option<City> {
+        let root_obj = data.as_object().unwrap();
+        let name = root_obj.get("name").unwrap();
+
+        let coord = root_obj.get("coord").unwrap().as_object().unwrap();
+        let lat = coord.get("lat").unwrap();
+        let lng = coord.get("lon").unwrap();
+
+        let country: String = match root_obj.get("country") {
+            Some(n) => n.to_string(),
+            None => String::from(""),
+        };
+
+        let city = City {
+            name: name.to_string(),
+            lat: lat.as_f64().unwrap(),
+            lng: lng.as_f64().unwrap(),
+            country: country,
+        };
+
+        Some(city)
     }
 
     pub fn print(json: &str) {

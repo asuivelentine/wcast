@@ -29,8 +29,8 @@ pub struct City {
 
 #[derive(Debug)]
 pub struct Day {
-    sunrise: u64,
-    sunset: u64,
+    sunrise: Time,
+    sunset: Time,
     tmp_max: f64,
     tmp_min: f64,
     weather: Vec<Weather>   

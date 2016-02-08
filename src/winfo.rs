@@ -72,6 +72,19 @@ impl WeatherInfo {
         }
     }
 
+
+    fn get_country(data: Json) -> Option<String> {
+        let root_obj = data.as_object().unwrap();
+        let mut city = String::new();
+        match root_obj.get("city") {
+            Some(n) => city = n.as_object().unwrap().get("country").unwrap().to_string(),
+            None => {
+                city = root_obj.get("sys").unwrap().as_object().unwrap().get("country").unwrap().to_string();
+            }
+        }
+        Some(city)
+    }
+
     fn get_city(data: Json) -> Option<City> {
         let root_obj = data.as_object().unwrap();
         let name = root_obj.get("name").unwrap();

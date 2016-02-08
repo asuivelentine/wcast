@@ -29,8 +29,6 @@ pub struct City {
 pub struct Day {
     sunrise: Time,
     sunset: Time,
-    tmp_max: f64,
-    tmp_min: f64,
     weather: Vec<Weather>   
 }
 
@@ -72,6 +70,18 @@ impl WeatherInfo {
         }
     }
 
+    fn get_wind(data: Json) -> Option<Wind> {
+        let root_obj = data.as_object().unwrap();
+        let main = root_obj.get("main").unwrap().as_object().unwrap();
+        let wind = main.get("wind").unwrap().as_object().unwrap();
+        
+        let wind = Wind {
+            speed: wind.get("speed").unwrap().as_f64().unwrap(),
+            degree: wind.get("deg").unwrap().as_f64().unwrap(),
+        };
+        
+        Some(wind)
+    }
 
     fn get_country(data: Json) -> Option<String> {
         let root_obj = data.as_object().unwrap();

@@ -71,7 +71,7 @@ impl WeatherGetter {
         self
     }
 
-    pub fn with_forcast(mut self, forecast: Forecast) -> WeatherGetter {
+    pub fn with_forecast(mut self, forecast: Forecast) -> WeatherGetter {
         self.forecast = forecast;
         self
     }

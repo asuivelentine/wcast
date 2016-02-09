@@ -37,7 +37,7 @@ impl WeatherGather {
     pub fn get_weather(&self) -> WeatherGetter {
         WeatherGetter {
             li: LocationInformation::from_coords(52.5243700, 13.4105300),
-            lang: String::new(),
+            lang: String::from("en"),
             forecast: false,
             wu: WeatherUnit::Celsius,
         }

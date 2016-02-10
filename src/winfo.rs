@@ -69,16 +69,27 @@ impl WeatherInfo {
         }
     }
 
-    fn get_wind(data_root: Json) -> Option<Wind> {
-        let root_obj = data_root.as_object().unwrap();
-        let main = root_obj.get("main").unwrap().as_object().unwrap();
-        let wind = main.get("wind").unwrap().as_object().unwrap();
-        
-        let wind = Wind {
-            speed: wind.get("speed").unwrap().as_f64().unwrap(),
-            degree: wind.get("deg").unwrap().as_f64().unwrap(),
-        };
-        
+    fn get_wind(data_parent: Json ) -> Option<Wind> {
+       let value = data_parent.as_object()
+           .and_then(|parent| parent.get("wind"))
+           .and_then(|wind| wind.as_object());
+
+       if value.is_none() {
+            return None
+       }
+       let value = value.unwrap();
+
+       let speed = value.get("speed")
+           .and_then(|speed| speed.as_f64());
+
+       let degree = value.get("deg")
+           .and_then(|degree| degree.as_f64());
+
+       let wind = Wind {
+            speed: speed.unwrap(),
+            degree: degree.unwrap(),
+       };
+
         Some(wind)
     }
 

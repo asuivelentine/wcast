@@ -3,7 +3,6 @@ use std::result::Result as RResult;
 
 use winfo::WeatherInfo;
 
-use hyper;
 use hyper::Client;
 use hyper::header::Connection;
 

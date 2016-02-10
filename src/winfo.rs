@@ -94,6 +94,12 @@ impl WeatherInfo {
                 .and_then(|city| city.get("country"))
                 .and_then(|country| country.as_string());
 
+                let testeri= n.as_object()
+                .and_then(|city| city.get("country"))
+                .and_then(|country| country.as_string())
+                .unwrap_or( Err( Error::new( ErrorKind::NotFound, "country-code is missing")));
+
+
                 match value {
                     Some(c) => Ok(c.to_string()),
                     None => Err( Error::new( ErrorKind::NotFound, "country-code is missing")),

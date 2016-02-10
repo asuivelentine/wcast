@@ -69,8 +69,8 @@ impl WeatherInfo {
         }
     }
 
-    fn get_wind(data: Json) -> Option<Wind> {
-        let root_obj = data.as_object().unwrap();
+    fn get_wind(data_root: Json) -> Option<Wind> {
+        let root_obj = data_root.as_object().unwrap();
         let main = root_obj.get("main").unwrap().as_object().unwrap();
         let wind = main.get("wind").unwrap().as_object().unwrap();
         
@@ -82,8 +82,8 @@ impl WeatherInfo {
         Some(wind)
     }
 
-    fn get_country(data: Json) -> Option<String> {
-        let root_obj = data.as_object().unwrap();
+    fn get_country(data_root: Json) -> Option<String> {
+        let root_obj = data_root.as_object().unwrap();
 
         match root_obj.get("city") {
             Some(n) => {
@@ -111,8 +111,8 @@ impl WeatherInfo {
         None
     }
 
-    fn get_city(data: Json) -> Option<City> {
-        let root_obj = data.as_object().unwrap();
+    fn get_city(data_root: Json) -> Option<City> {
+        let root_obj = data_root.as_object().unwrap();
         let name = root_obj.get("name").unwrap();
 
         let coord = root_obj.get("coord").unwrap().as_object().unwrap();
@@ -132,10 +132,5 @@ impl WeatherInfo {
         };
 
         Some(city)
-    }
-
-    pub fn print(json: &str) {
-        let data = Json::from_str(json);
-        println!("{:?}", data);
     }
 }

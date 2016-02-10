@@ -103,7 +103,6 @@ impl WeatherGetter {
         
 
         let json = WeatherGetter::fetch_weather_data(&uri);
-        WeatherInfo::print(&json);
         let weather = WeatherInfo::from(json);
         Ok(weather)
     }

@@ -1,8 +1,10 @@
 use std::convert::From;
+use std::result::Result as RResult;
+use std::io::{ Error, ErrorKind };
 
-use rustc_serialize;
 use rustc_serialize::json::Json;
 
+pub type Result<T> = RResult<T, Error>;
 pub type Time = u64;
 
 //temporary, until the real json data is parsed...
@@ -83,16 +85,33 @@ impl WeatherInfo {
         Some(wind)
     }
 
-    fn get_country(data: Json) -> Option<String> {
+    fn get_country(data: Json) -> Result<String> {
         let root_obj = data.as_object().unwrap();
-        let mut city = String::new();
-        let city = match root_obj.get("city") {
-            Some(n) => n.as_object().unwrap().get("country").unwrap().to_string(),
-            None => 
-                root_obj.get("sys").and_then(|sys| sys.as_object()).and_then(|sys| sys.get
-                    ("country")).and_then(|c| c.as_string()).unwrap_or("").to_string(),
+
+        match root_obj.get("city") {
+            Some(n) => {
+                let value = n.as_object()
+                .and_then(|city| city.get("country"))
+                .and_then(|country| country.as_string());
+
+                match value {
+                    Some(c) => Ok(c.to_string()),
+                    None => Err( Error::new( ErrorKind::NotFound, "country-code is missing")),
+                };
+            }
+            None => { 
+                let value =root_obj.get("sys")
+                .and_then(|sys| sys.as_object())
+                .and_then(|sys| sys.get("country"))
+                .and_then(|c| c.as_string());
+
+                match value {
+                    Some(c) => Ok(c.to_string()),
+                    None => Err(Error::new( ErrorKind::NotFound, "country-code is missing")),
+                };
+            }
         };
-        Some(city)
+        Err(Error::new( ErrorKind::NotFound, "country-code is missing"))
     }
 
     fn get_city(data: Json) -> Option<City> {

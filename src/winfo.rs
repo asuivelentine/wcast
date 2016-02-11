@@ -158,12 +158,8 @@ mod tests {
             \"sys\":{\"pod\":\"d\"},
             \"dt_txt\":\"2016-02-11 12:00:00\"}";
         let json = Json::from_str(&json).unwrap();
-
         let wind = WeatherInfo::get_wind(json);
-        if wind.is_none() {
-
-            assert!(false);
-        }
+        assert!(wind.is_some());
         let wind = wind.unwrap();
 
         assert_eq!(7.34, wind.speed);
@@ -180,12 +176,8 @@ mod tests {
             \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
                 1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
         let json = Json::from_str(&json).unwrap();
-
         let wind = WeatherInfo::get_wind(json);
-        if wind.is_none() {
-            assert!(false);
-        }
-
+        assert!(wind.is_some());
         let wind = wind.unwrap();
 
         assert_eq!(2.03, wind.speed);

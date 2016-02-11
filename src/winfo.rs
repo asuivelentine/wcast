@@ -148,29 +148,47 @@ mod tests {
     #[test]
     fn test_wind_forecast() {
         let json = "{\"main\":
-    {\"temp\":273.4,\"temp_min\":272.173,\"temp_max\":273.4,\"pressure\":1009.3,\"sea_level\":
-    1029.81,\"grnd_level\":1009.3,\"humidity\":91,\"temp_kf\":1.22},
-    \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",\"icon\":\"04d\"}],
-    \"clouds\":{\"all\":80},
-    \"wind\":{\"speed\":7.34,\"deg\":159.504},
-    \"rain\":{},
-    \"snow\":{},
-    \"sys\":{\"pod\":\"d\"},
-    \"dt_txt\":\"2016-02-11 12:00:00\"}";
-    let json = Json::from_str(&json).unwrap();
+            {\"temp\":273.4,\"temp_min\":272.173,\"temp_max\":273.4,\"pressure\":1009.3,\"sea_level\":
+            1029.81,\"grnd_level\":1009.3,\"humidity\":91,\"temp_kf\":1.22},
+            \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",\"icon\":\"04d\"}],
+            \"clouds\":{\"all\":80},
+            \"wind\":{\"speed\":7.34,\"deg\":159.504},
+            \"rain\":{},
+            \"snow\":{},
+            \"sys\":{\"pod\":\"d\"},
+            \"dt_txt\":\"2016-02-11 12:00:00\"}";
+        let json = Json::from_str(&json).unwrap();
 
-    let wind = WeatherInfo::get_wind(json);
-    if wind.is_none() {
+        let wind = WeatherInfo::get_wind(json);
+        if wind.is_none() {
 
-        assert!(false);
+            assert!(false);
+        }
+        let wind = wind.unwrap();
+
+        assert_eq!(7.34, wind.speed);
+        assert_eq!(159.504, wind.degree);
     }
-    let wind = wind.unwrap();
 
-    assert_eq!(7.34, wind.speed);
-    assert_eq!(159.504, wind.degree);
-    }
-
+    #[test]
     fn test_wind() {
+        let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
+            \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
+            \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
+            \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
+            \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
+            \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
+                1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
+
+        let wind = WeatherInfo::get_wind(json);
+        if wind.is_none() {
+            assert!(false);
+        }
+
+        let wind = wind.unwrap();
+
+        assert_eq!(2.03, wind.speed);
+        assert_eq!(233.706, wind.degree);
 
     }
 }

@@ -179,6 +179,7 @@ mod tests {
             \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
             \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
                 1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
+        let json = Json::from_str(&json).unwrap();
 
         let wind = WeatherInfo::get_wind(json);
         if wind.is_none() {
@@ -188,7 +189,7 @@ mod tests {
         let wind = wind.unwrap();
 
         assert_eq!(2.03, wind.speed);
-        assert_eq!(233.706, wind.degree);
+        assert_eq!(233.501, wind.degree);
 
     }
 }

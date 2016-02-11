@@ -139,3 +139,38 @@ impl WeatherInfo {
         Some(city)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use rustc_serialize::json::Json;
+    use super::WeatherInfo;
+
+    #[test]
+    fn test_wind_forecast() {
+        let json = "{\"main\":
+    {\"temp\":273.4,\"temp_min\":272.173,\"temp_max\":273.4,\"pressure\":1009.3,\"sea_level\":
+    1029.81,\"grnd_level\":1009.3,\"humidity\":91,\"temp_kf\":1.22},
+    \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",\"icon\":\"04d\"}],
+    \"clouds\":{\"all\":80},
+    \"wind\":{\"speed\":7.34,\"deg\":159.504},
+    \"rain\":{},
+    \"snow\":{},
+    \"sys\":{\"pod\":\"d\"},
+    \"dt_txt\":\"2016-02-11 12:00:00\"}";
+    let json = Json::from_str(&json).unwrap();
+
+    let wind = WeatherInfo::get_wind(json);
+    if wind.is_none() {
+
+        assert!(false);
+    }
+    let wind = wind.unwrap();
+
+    assert_eq!(7.34, wind.speed);
+    assert_eq!(159.504, wind.degree);
+    }
+
+    fn test_wind() {
+
+    }
+}

@@ -113,16 +113,13 @@ impl WeatherInfo {
 
     fn get_city(data_root: Json) -> Option<City> {
         let root_obj = data_root.as_object().unwrap();
-        let name = root_obj.get("name").unwrap();
+        let name = root_obj.get("name").unwrap().as_string().unwrap();
 
         let coord = root_obj.get("coord").unwrap().as_object().unwrap();
         let lat = coord.get("lat").unwrap();
         let lng = coord.get("lon").unwrap();
 
-        let country: String = match root_obj.get("country") {
-            Some(n) => n.to_string(),
-            None => String::from(""),
-        };
+        let country = WeatherInfo::get_country(data_root.clone()).unwrap();
 
         let city = City {
             name: name.to_string(),
@@ -214,8 +211,29 @@ mod tests {
 
         let json = Json::from_str(&json).unwrap();
         let country= WeatherInfo::get_country(json);
+
         assert!(country.is_some());
         assert_eq!("RU", country.unwrap()) 
+    }
 
+    #[test]
+    fn test_city() {
+         let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
+         \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
+         \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
+         \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
+         \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
+         \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
+         1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
+        
+        let json = Json::from_str(&json).unwrap();
+        let city= WeatherInfo::get_city(json);
+
+        assert!(city.is_some());
+        let city = city.unwrap();
+        assert_eq!("London", city.name);
+        assert_eq!("GB", city.country);
+        assert_eq!(51.51, city.lat);
+        assert_eq!(-0.13, city.lng);
     }
 }

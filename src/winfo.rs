@@ -366,6 +366,5 @@ mod tests {
         assert_eq!(55.75222, coord.lat);
         assert_eq!(37.615555, coord.lng);
         */
- 
     }
 }

@@ -96,23 +96,18 @@ impl WeatherInfo {
     fn get_country(data_root: Json) -> Option<String> {
         let root_obj = data_root.as_object().unwrap();
 
-        let country = match root_obj.get("city") {
+        match root_obj.get("city") {
             Some(n) => {
                 n.as_object()
                 .and_then(|city| city.get("country"))
-                .and_then(|country| country.as_string())
+                .and_then(|country| country.as_string().map(|s| s.to_string()))
             }
             None => { 
                 root_obj.get("sys")
                 .and_then(|sys| sys.as_object())
                 .and_then(|sys| sys.get("country"))
-                .and_then(|c| c.as_string())
+                .and_then(|c| c.as_string().map(|i| i.to_string()))
             }
-        };
-
-        match country {
-            Some(n) => Some(n.to_string()),
-            None => None,
         }
     }
 

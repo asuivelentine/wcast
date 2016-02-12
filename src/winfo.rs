@@ -196,4 +196,27 @@ mod tests {
         assert_eq!("GB", country.unwrap()) 
 
     }
+
+    #[test]
+    fn test_country_forecast() {
+        let json = " {\"city\":{\"id\":524901,\"name\":\"Moscow\",\"coord\":{\"lon\":37.615555,
+            \"lat\":55.75222},\"country\":\"RU\",\"population\":0,\"sys\":{\"population\":0}},
+            \"cod\":\"200\",\"message\":0.008,\"cnt\":37,\"list\":[{\"dt\":1455278400,\"main\":{
+                \"temp\":273.04,\"temp_min\":273.04,\"temp_max\":273.044,\"pressure\":1005.45,
+            \"sea_level\":1026,\"grnd_level\":1005.45,\"humidity\":93,\"temp_kf\":0},\"weather\":[
+            {\"id\":600,\"main\":\"Snow\",\"description\":\"light snow\",\"icon\":\"13d\"}],
+            \"clouds\":{\"all\":92},\"wind\":{\"speed\":6.9,\"deg\":156},\"snow\":{\"3h\":0.89},
+            \"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-12 12:00:00\"},{\"dt\":1455289200,\"main\":
+            {\"temp\":273.04,\"temp_min\":273.04,\"temp_max\":273.042,\"pressure\":1006.17,
+                \"sea_level\":1026.81,\"grnd_level\":1006.17,\"humidity\":93,\"temp_kf\":0},
+                \"weather\":[{\"id\":600,\"main\":\"Snow\",\"description\":\"light snow\",\"icon\":
+                    \"13n\"}],\"clouds\":{\"all\":92},\"wind\":{\"speed\":4.96,\"deg\":159.001},
+                \"snow\":{\"3h\":0.875},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-12 15:00:00\"}";
+
+        let json = Json::from_str(&json).unwrap();
+        let country= WeatherInfo::get_country(json);
+        assert!(country.is_some());
+        assert_eq!("RU", country.unwrap()) 
+
+    }
 }

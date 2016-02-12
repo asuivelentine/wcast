@@ -142,13 +142,9 @@ mod tests {
         let json = "{\"main\":
             {\"temp\":273.4,\"temp_min\":272.173,\"temp_max\":273.4,\"pressure\":1009.3,\"sea_level\":
             1029.81,\"grnd_level\":1009.3,\"humidity\":91,\"temp_kf\":1.22},
-            \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",\"icon\":\"04d\"}],
-            \"clouds\":{\"all\":80},
-            \"wind\":{\"speed\":7.34,\"deg\":159.504},
-            \"rain\":{},
-            \"snow\":{},
-            \"sys\":{\"pod\":\"d\"},
-            \"dt_txt\":\"2016-02-11 12:00:00\"}";
+            \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",\"icon\":
+            \"04d\"}],\"clouds\":{\"all\":80},\"wind\":{\"speed\":7.34,\"deg\":159.504},\"rain\":{},
+            \"snow\":{},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-11 12:00:00\"}";
         let json = Json::from_str(&json).unwrap();
         let wind = WeatherInfo::get_wind(json);
         assert!(wind.is_some());

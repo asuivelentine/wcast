@@ -2,7 +2,6 @@ language: rust
 sudo: false
 os: linux
 rust:
-    - nightly
     - beta
     - stable
         

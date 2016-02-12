@@ -179,4 +179,21 @@ mod tests {
         assert_eq!(233.501, wind.degree);
 
     }
+
+    #[test]
+    fn test_country() {
+        let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
+            \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
+            \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
+            \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
+            \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
+            \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
+                1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
+        
+        let json = Json::from_str(&json).unwrap();
+        let country= WeatherInfo::get_country(json);
+        assert!(country.is_some());
+        assert_eq!("GB", country.unwrap()) 
+
+    }
 }

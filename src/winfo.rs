@@ -367,4 +367,47 @@ mod tests {
         assert_eq!(37.615555, coord.lng);
         */
     }
+
+    #[test]
+    fn test_name() {
+         let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
+         \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
+         \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
+         \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
+         \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
+         \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
+         1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
+
+        let json = Json::from_str(&json).unwrap();
+        let name = WeatherInfo::get_coords(json);
+        assert!(name.is_some());
+        /*
+        assert_eq!("London", name.unwrap());
+        */
+    }
+
+    #[test]
+    fn test_name_forecast() {
+        let json = "{\"city\":{\"id\":524901,\"name\":\"Moscow\",\"coord\":{\"lon\":37.615555,
+        \"lat\":55.75222},\"country\":\"RU\",\"population\":0,\"sys\":{\"population\":0}},
+        \"cod\":\"200\",\"message\":0.008,\"cnt\":37,\"list\":[{\"dt\":1455278400,\"main\":{
+        \"temp\":274.089,\"temp_min\":274.089,\"temp_max\":274.089,\"pressure\":1009.52,
+        \"sea_level\":1030.13,\"grnd_level\":1009.52,\"humidity\":96,\"temp_kf\":0},
+        \"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],
+        \"clouds\":{\"all\":92},\"wind\":{\"speed\":4.82,\"deg\":270.001},\"rain\":{\"3h\":0.17},
+        \"snow\":{\"3h\":0.05},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-16 21:00:00\"},
+        {\"dt\":1455667200,\"main\":{\"temp\":273.583,\"temp_min\":273.583,\"temp_max\":273.583,
+        \"pressure\":1010.05,\"sea_level\":1030.65,\"grnd_level\":1010.05,\"humidity\":97,
+        \"temp_kf\":0},\"weather\":[{\"id\":600,\"main\":\"Snow\",\"description\":\"light snow\",
+        \"icon\":\"13n\"}],\"clouds\":{\"all\":92},\"wind\":{\"speed\":5.01,\"deg\":273.501},
+        \"rain\":{},\"snow\":{\"3h\":0.12},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-17 00:00:00\"
+        }]}";
+
+        let json = Json::from_str(&json).unwrap();
+        let name = WeatherInfo::get_coords(json);
+        assert!(name.is_some());
+        /*
+        assert_eq!("Moscow", name.unwrap());
+        */
+    }
 }

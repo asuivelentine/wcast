@@ -1,5 +1,7 @@
 use std::convert::From;
 
+use std::collections::BTreeMap;
+
 use rustc_serialize::json;
 use rustc_serialize::json::{ Json, Object };
 
@@ -32,8 +34,8 @@ pub struct Coord {
 
 #[derive(Debug)]
 pub struct Day {
-    sunrise: Time,
-    sunset: Time,
+    sunrise: Option<Time>,
+    sunset: Option<Time>,
     weather: Vec<Weather>   
 }
 
@@ -75,9 +77,8 @@ impl WeatherInfo {
         }
     }
 
-    fn get_wind(data_parent: Json ) -> Option<Wind> {
-       let value = data_parent.as_object()
-           .and_then(|parent| parent.get("wind"))
+    fn get_wind(data_parent: &BTreeMap<String, Json> ) -> Option<Wind> {
+       let value = data_parent.get("wind")
            .and_then(|wind| wind.as_object());
 
        if value.is_none() {
@@ -164,6 +165,67 @@ impl WeatherInfo {
     
     }
 
+    fn get_weather(data_root: Json) -> Option<Weather> {
+        let root_obj = data_root.as_object().unwrap();
+        
+        match root_obj.get("list") {
+            Some(n) => return None, //WeatherInfo::get_weather_forecast(n),
+            None =>  WeatherInfo::get_weather_normal(root_obj),
+        }
+
+    }
+
+    fn get_weather_normal(data_root: &BTreeMap<String, Json>) -> Option<Weather> {
+        let time = data_root.get("dt").and_then(|time| time.as_u64()).unwrap();
+        let weather = data_root.get("main").and_then(|main| main.as_object()).unwrap();
+
+        let description = data_root.get("weather")
+            .and_then(|weather| weather.as_array()).unwrap();
+        let description = description.into_iter().next()
+            .and_then(|next| next.as_object())
+            .and_then(|weather| weather.get("description"))
+            .and_then(|description| description.as_string())
+            .map(|des| des.to_string()).unwrap();
+
+        println!("{:?}", description);
+
+        let temp = weather.get("temp")
+            .and_then(|temp| temp.as_f64())
+            .unwrap();
+        let pressure = weather.get("pressure")
+            .and_then(|pressure| pressure.as_f64())
+            .unwrap();
+        let humidity = weather.get("humidity")
+            .and_then(|humidity| humidity.as_u64())
+            .unwrap();
+        let sea_level = weather.get("sea_level")
+            .and_then(|sea_level| sea_level.as_f64())
+            .unwrap();
+        let grnd_level = weather.get("grnd_level")
+            .and_then(|grnd_level| grnd_level.as_f64())
+            .unwrap();
+        let wind = WeatherInfo::get_wind(data_root);
+        if let Some(wind) = WeatherInfo::get_wind(data_root) {
+            Some(Weather {
+                description: description,
+                temp: temp,
+                humidity: humidity,
+                pressure: pressure,
+                sea_level: sea_level,
+                grnd_level: grnd_level,
+                when: time,
+                wind: wind,
+            })
+        } else {
+            None
+        }
+    }
+
+    /*fn get_weather_forecast(list: &Json) -> Option<Weather> {
+
+    }
+    */
+
     fn get_city(data_root: Json) -> Option<City> {
         let root_obj = data_root.as_object().unwrap();
         
@@ -196,7 +258,7 @@ mod tests {
             \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
                 1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
         let json = Json::from_str(&json).unwrap();
-        let wind = WeatherInfo::get_wind(json);
+        let wind = WeatherInfo::get_wind(json.as_object().unwrap());
         assert!(wind.is_some());
         let wind = wind.unwrap();
 
@@ -216,7 +278,9 @@ mod tests {
         \"rain\":{},\"snow\":{},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-11 12:00:00\"}";
 
         let json = Json::from_str(&json).unwrap();
-        let wind = WeatherInfo::get_wind(json);
+        let json = json.as_object();
+        assert!(json.is_some());
+        let wind = WeatherInfo::get_wind(json.unwrap());
         assert!(wind.is_some());
         let wind = wind.unwrap();
 
@@ -409,5 +473,62 @@ mod tests {
         /*
         assert_eq!("Moscow", name.unwrap());
         */
+    }
+
+    #[test]
+    fn test_weather_normal() {
+        let json = "{\"coord\":{\"lon\":138.93,\"lat\":34.97},\"weather\":[{\"id\":502,
+        \"main\":\"Rain\",\"description\":\"heavy intensity rain\",\"icon\":\"10n\"}],
+        \"base\":\"cmc stations\",\"main\":{\"temp\":288.555,\"pressure\":1009.58,
+        \"humidity\":95,\"temp_min\":288.555,\"temp_max\":288.555,\"sea_level\":1018.89,
+        \"grnd_level\":1009.58},\"wind\":{\"speed\":9.59,\"deg\":206.501},\"rain\":{\"3h\":12.41},
+        \"clouds\":{\"all\":92},\"dt\":1455396748,\"sys\":{\"message\":0.0097,\"country\":\"JP\",
+        \"sunrise\":1455312750,\"sunset\":1455351896},\"id\":1851632,\"name\":\"Shuzenji\",
+        \"cod\":200}";
+
+
+        let json = Json::from_str(&json).unwrap();
+        let weather = WeatherInfo::get_weather(json);
+        assert!(weather.is_some());
+    }
+
+    //#[test]
+    fn test_weather_forecast() {
+        let json = " {\"city\":{\"id\":1851632,\"name\":\"Shuzenji\",\"coord\":{\"lon\":138.933334,
+        \"lat\":34.966671},\"country\":\"JP\",\"population\":0,\"sys\":{\"population\":0}},
+        \"cod\":\"200\",\"message\":0.0056,\"cnt\":40,\"list\":[{\"dt\":1455408000,\"main\":{
+        \"temp\":285.62,\"temp_min\":284.269,\"temp_max\":285.62,\"pressure\":920.42,
+        \"sea_level\":1014.58,\"grnd_level\":920.42,\"humidity\":98,\"temp_kf\":1.35},
+        \"weather\":[{\"id\":501,\"main\":\"Rain\",\"description\":\"moderate rain\",
+        \"icon\":\"10d\"}],\"clouds\":{\"all\":44},\"wind\":{\"speed\":0.83,\"deg\":200.5},
+        \"rain\":{\"3h\":8.44},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 00:00:00\"},
+        {\"dt\":1455418800,\"main\":{\"temp\":289.44,\"temp_min\":288.168,\"temp_max\":289.44,
+        \"pressure\":918.51,\"sea_level\":1012.27,\"grnd_level\":918.51,\"humidity\":81,
+        \"temp_kf\":1.27},\"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",
+        \"icon\":\"10d\"}],\"clouds\":{\"all\":0},\"wind\":{\"speed\":1.89,\"deg\":242.002},
+        \"rain\":{\"3h\":0.175},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 03:00:00\"},
+        {\"dt\":1455429600,\"main\":{\"temp\":288.45,\"temp_min\":287.246,\"temp_max\":288.45,
+        \"pressure\":917.46,\"sea_level\":1011.19,\"grnd_level\":917.46,\"humidity\":68,
+        \"temp_kf\":1.2},\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"sky is clear\",
+        \"icon\":\"01d\"}],\"clouds\":{\"all\":0},\"wind\":{\"speed\":2.5,\"deg\":249.501},\"rain\":{},
+        \"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 06:00:00\"},{\"dt\":1455440400,
+        \"main\":{\"temp\":267.159,\"temp_min\":267.159,\"temp_max\":267.159,\"pressure\":940.32,
+        \"sea_level\":1040.37,\"grnd_level\":940.32,\"humidity\":77,\"temp_kf\":0},
+        \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",
+        \"icon\":\"04n\"}],\"clouds\":{\"all\":64},\"wind\":{\"speed\":1.06,\"deg\":229.5},\"rain\":{},
+        \"snow\":{},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-18 18:00:00\"},{\"dt\":1455829200,
+        \"main\":{\"temp\":269.084,\"temp_min\":269.084,\"temp_max\":269.084,\"pressure\":939.91,
+        \"sea_level\":1039.86,\"grnd_level\":939.91,\"humidity\":77,\"temp_kf\":0},\"weather\":[{\"id\":500,
+        \"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],\"clouds\":{\"all\":0},
+        \"wind\":{\"speed\":1.31,\"deg\":232.5},\"rain\":{\"3h\":0.0025},\"snow\":{},
+        \"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-18 21:00:00\"}]}";
+
+        let json = Json::from_str(&json).unwrap();
+        let weather = WeatherInfo::get_weather(json);
+        assert!(weather.is_some());
+        println!("{:?}", weather); 
+        println!("{:?}", "fdfdfdfdfd"); 
+        let weather = weather.unwrap();
+        //assert!(285.62, weather.temp);
     }
 }

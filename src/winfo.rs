@@ -2,8 +2,7 @@ use std::convert::From;
 
 use std::collections::BTreeMap;
 
-use rustc_serialize::json;
-use rustc_serialize::json::{ Json, Object };
+use rustc_serialize::json::{ Json };
 
 pub type Time = u64;
 
@@ -204,7 +203,6 @@ impl WeatherInfo {
         let grnd_level = weather.get("grnd_level")
             .and_then(|grnd_level| grnd_level.as_f64())
             .unwrap();
-        let wind = WeatherInfo::get_wind(data_root);
         if let Some(wind) = WeatherInfo::get_wind(data_root) {
             Some(Weather {
                 description: description,
@@ -227,8 +225,6 @@ impl WeatherInfo {
     */
 
     fn get_city(data_root: Json) -> Option<City> {
-        let root_obj = data_root.as_object().unwrap();
-        
         let name = WeatherInfo::get_name(data_root.clone());
         let country = WeatherInfo::get_country(data_root.clone());
         let coord = WeatherInfo::get_coords(data_root.clone());
@@ -250,98 +246,52 @@ mod tests {
 
     #[test]
     fn test_wind() {
-        let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
-            \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
-            \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
-            \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
-            \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
-            \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
-                1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
-        let json = Json::from_str(&json).unwrap();
-        let wind = WeatherInfo::get_wind(json.as_object().unwrap());
+        let wind = WeatherInfo::get_wind(get_json(false).as_object().unwrap());
         assert!(wind.is_some());
         let wind = wind.unwrap();
 
-        assert_eq!(2.03, wind.speed);
-        assert_eq!(233.501, wind.degree);
+        assert_eq!(9.59, wind.speed);
+        assert_eq!(206.501, wind.degree);
 
     }
     
     #[test]
     fn test_wind_forecast() {
 
-        let json = 
-        "{\"main\":{\"temp\":273.4,\"temp_min\":272.173,\"temp_max\":273.4,\"pressure\":1009.3,
-        \"sea_level\":1029.81,\"grnd_level\":1009.3,\"humidity\":91,\"temp_kf\":1.22},
-        \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",
-        \"icon\":\"04d\"}],\"clouds\":{\"all\":80},\"wind\":{\"speed\":7.34,\"deg\":159.504},
-        \"rain\":{},\"snow\":{},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-11 12:00:00\"}";
+        let json = get_json(true);
+        let json = json.as_object()
+            .and_then(|root| root.get("list"))
+            .and_then(|list| list.as_array()).unwrap().into_iter().next()
+            .and_then(|json| json.as_object());
+            //.and_then(|entry| entry.get("main"))
+            //.and_then(|main| main.as_object());
 
-        let json = Json::from_str(&json).unwrap();
-        let json = json.as_object();
         assert!(json.is_some());
+        
         let wind = WeatherInfo::get_wind(json.unwrap());
         assert!(wind.is_some());
-        let wind = wind.unwrap();
-
-        assert_eq!(7.34, wind.speed);
-        assert_eq!(159.504, wind.degree);
     }
 
 
     #[test]
     fn test_country() {
-        let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
-            \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
-            \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
-            \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
-            \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
-            \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
-                1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
-        
-        let json = Json::from_str(&json).unwrap();
-        let country= WeatherInfo::get_country(json);
+        let country= WeatherInfo::get_country(get_json(false));
         assert!(country.is_some());
-        assert_eq!("GB", country.unwrap()) 
+        assert_eq!("JP", country.unwrap()) 
 
     }
 
     #[test]
     fn test_country_forecast() {
-        let json = "{\"city\":{\"id\":524901,\"name\":\"Moscow\",\"coord\":{\"lon\":37.615555,
-        \"lat\":55.75222},\"country\":\"RU\",\"population\":0,\"sys\":{\"population\":0}},
-        \"cod\":\"200\",\"message\":0.008,\"cnt\":37,\"list\":[{\"dt\":1455278400,\"main\":{
-        \"temp\":274.089,\"temp_min\":274.089,\"temp_max\":274.089,\"pressure\":1009.52,
-        \"sea_level\":1030.13,\"grnd_level\":1009.52,\"humidity\":96,\"temp_kf\":0},
-        \"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],
-        \"clouds\":{\"all\":92},\"wind\":{\"speed\":4.82,\"deg\":270.001},\"rain\":{\"3h\":0.17},
-        \"snow\":{\"3h\":0.05},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-16 21:00:00\"},
-        {\"dt\":1455667200,\"main\":{\"temp\":273.583,\"temp_min\":273.583,\"temp_max\":273.583,
-        \"pressure\":1010.05,\"sea_level\":1030.65,\"grnd_level\":1010.05,\"humidity\":97,
-        \"temp_kf\":0},\"weather\":[{\"id\":600,\"main\":\"Snow\",\"description\":\"light snow\",
-        \"icon\":\"13n\"}],\"clouds\":{\"all\":92},\"wind\":{\"speed\":5.01,\"deg\":273.501},
-        \"rain\":{},\"snow\":{\"3h\":0.12},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-17 00:00:00\"
-        }]}";
-
-        let json = Json::from_str(&json).unwrap();
-        let country= WeatherInfo::get_country(json);
+        let country= WeatherInfo::get_country(get_json(true));
 
         assert!(country.is_some());
-        assert_eq!("RU", country.unwrap()) 
+        assert_eq!("JP", country.unwrap()) 
     }
 
     #[test]
     fn test_city() {
-         let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
-         \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
-         \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
-         \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
-         \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
-         \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
-         1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
-        
-        let json = Json::from_str(&json).unwrap();
-        let city= WeatherInfo::get_city(json);
+        let city= WeatherInfo::get_city(get_json(false));
 
         assert!(city.is_some());
         /*
@@ -355,24 +305,7 @@ mod tests {
     
     #[test]
     fn test_city_forecast() {
-         let json = "{\"city\":{\"id\":524901,\"name\":\"Moscow\",\"coord\":{\"lon\":37.615555,
-        \"lat\":55.75222},\"country\":\"RU\",\"population\":0,\"sys\":{\"population\":0}},
-        \"cod\":\"200\",\"message\":0.008,\"cnt\":37,\"list\":[{\"dt\":1455278400,\"main\":{
-        \"temp\":274.089,\"temp_min\":274.089,\"temp_max\":274.089,\"pressure\":1009.52,
-        \"sea_level\":1030.13,\"grnd_level\":1009.52,\"humidity\":96,\"temp_kf\":0},
-        \"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],
-        \"clouds\":{\"all\":92},\"wind\":{\"speed\":4.82,\"deg\":270.001},\"rain\":{\"3h\":0.17},
-        \"snow\":{\"3h\":0.05},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-16 21:00:00\"},
-        {\"dt\":1455667200,\"main\":{\"temp\":273.583,\"temp_min\":273.583,\"temp_max\":273.583,
-        \"pressure\":1010.05,\"sea_level\":1030.65,\"grnd_level\":1010.05,\"humidity\":97,
-        \"temp_kf\":0},\"weather\":[{\"id\":600,\"main\":\"Snow\",\"description\":\"light snow\",
-        \"icon\":\"13n\"}],\"clouds\":{\"all\":92},\"wind\":{\"speed\":5.01,\"deg\":273.501},
-        \"rain\":{},\"snow\":{\"3h\":0.12},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-17 00:00:00\"
-        }]}";
-
-
-        let json = Json::from_str(&json).unwrap();
-        let city= WeatherInfo::get_city(json);
+        let city= WeatherInfo::get_city(get_json(true));
 
         assert!(city.is_some());
         /*
@@ -387,16 +320,7 @@ mod tests {
 
     #[test]
     fn test_coord() {
-        let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
-         \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
-         \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
-         \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
-         \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
-         \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
-         1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
-
-        let json = Json::from_str(&json).unwrap();
-        let coord = WeatherInfo::get_coords(json);
+        let coord = WeatherInfo::get_coords(get_json(false));
         assert!(coord.is_some());
         /*
         let coord = coord.unwrap();
@@ -407,23 +331,7 @@ mod tests {
 
     #[test]
     fn test_coord_forecast() {
-        let json = "{\"city\":{\"id\":524901,\"name\":\"Moscow\",\"coord\":{\"lon\":37.615555,
-        \"lat\":55.75222},\"country\":\"RU\",\"population\":0,\"sys\":{\"population\":0}},
-        \"cod\":\"200\",\"message\":0.008,\"cnt\":37,\"list\":[{\"dt\":1455278400,\"main\":{
-        \"temp\":274.089,\"temp_min\":274.089,\"temp_max\":274.089,\"pressure\":1009.52,
-        \"sea_level\":1030.13,\"grnd_level\":1009.52,\"humidity\":96,\"temp_kf\":0},
-        \"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],
-        \"clouds\":{\"all\":92},\"wind\":{\"speed\":4.82,\"deg\":270.001},\"rain\":{\"3h\":0.17},
-        \"snow\":{\"3h\":0.05},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-16 21:00:00\"},
-        {\"dt\":1455667200,\"main\":{\"temp\":273.583,\"temp_min\":273.583,\"temp_max\":273.583,
-        \"pressure\":1010.05,\"sea_level\":1030.65,\"grnd_level\":1010.05,\"humidity\":97,
-        \"temp_kf\":0},\"weather\":[{\"id\":600,\"main\":\"Snow\",\"description\":\"light snow\",
-        \"icon\":\"13n\"}],\"clouds\":{\"all\":92},\"wind\":{\"speed\":5.01,\"deg\":273.501},
-        \"rain\":{},\"snow\":{\"3h\":0.12},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-17 00:00:00\"
-        }]}";
-
-        let json = Json::from_str(&json).unwrap();
-        let coord = WeatherInfo::get_coords(json);
+        let coord = WeatherInfo::get_coords(get_json(true));
         assert!(coord.is_some());
         /*
         let coord = coord.unwrap();
@@ -434,16 +342,7 @@ mod tests {
 
     #[test]
     fn test_name() {
-         let json = "{\"coord\":{\"lon\":-0.13,\"lat\":51.51},\"weather\":[{\"id\":802,\"main\":
-         \"Clouds\",\"description\":\"scattered clouds\",\"icon\":\"03d\"}],\"base\":
-         \"cmc stations\",\"main\":{\"temp\":273.706,\"pressure\":1007.64,\"humidity\":86,
-         \"temp_min\":273.706,\"temp_max\":273.706,\"sea_level\":1017.9,\"grnd_level\":1007.64},
-         \"wind\":{\"speed\":2.03,\"deg\":233.501},\"clouds\":{\"all\":32},\"dt\":1455182444,
-         \"sys\":{\"message\":0.0059,\"country\":\"GB\",\"sunrise\":1455175339,\"sunset\":
-         1455210476},\"id\":2643743,\"name\":\"London\",\"cod\":200}\n";
-
-        let json = Json::from_str(&json).unwrap();
-        let name = WeatherInfo::get_coords(json);
+        let name = WeatherInfo::get_coords(get_json(false));
         assert!(name.is_some());
         /*
         assert_eq!("London", name.unwrap());
@@ -452,23 +351,7 @@ mod tests {
 
     #[test]
     fn test_name_forecast() {
-        let json = "{\"city\":{\"id\":524901,\"name\":\"Moscow\",\"coord\":{\"lon\":37.615555,
-        \"lat\":55.75222},\"country\":\"RU\",\"population\":0,\"sys\":{\"population\":0}},
-        \"cod\":\"200\",\"message\":0.008,\"cnt\":37,\"list\":[{\"dt\":1455278400,\"main\":{
-        \"temp\":274.089,\"temp_min\":274.089,\"temp_max\":274.089,\"pressure\":1009.52,
-        \"sea_level\":1030.13,\"grnd_level\":1009.52,\"humidity\":96,\"temp_kf\":0},
-        \"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],
-        \"clouds\":{\"all\":92},\"wind\":{\"speed\":4.82,\"deg\":270.001},\"rain\":{\"3h\":0.17},
-        \"snow\":{\"3h\":0.05},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-16 21:00:00\"},
-        {\"dt\":1455667200,\"main\":{\"temp\":273.583,\"temp_min\":273.583,\"temp_max\":273.583,
-        \"pressure\":1010.05,\"sea_level\":1030.65,\"grnd_level\":1010.05,\"humidity\":97,
-        \"temp_kf\":0},\"weather\":[{\"id\":600,\"main\":\"Snow\",\"description\":\"light snow\",
-        \"icon\":\"13n\"}],\"clouds\":{\"all\":92},\"wind\":{\"speed\":5.01,\"deg\":273.501},
-        \"rain\":{},\"snow\":{\"3h\":0.12},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-17 00:00:00\"
-        }]}";
-
-        let json = Json::from_str(&json).unwrap();
-        let name = WeatherInfo::get_coords(json);
+        let name = WeatherInfo::get_coords(get_json(true));
         assert!(name.is_some());
         /*
         assert_eq!("Moscow", name.unwrap());
@@ -477,58 +360,63 @@ mod tests {
 
     #[test]
     fn test_weather_normal() {
-        let json = "{\"coord\":{\"lon\":138.93,\"lat\":34.97},\"weather\":[{\"id\":502,
-        \"main\":\"Rain\",\"description\":\"heavy intensity rain\",\"icon\":\"10n\"}],
-        \"base\":\"cmc stations\",\"main\":{\"temp\":288.555,\"pressure\":1009.58,
-        \"humidity\":95,\"temp_min\":288.555,\"temp_max\":288.555,\"sea_level\":1018.89,
-        \"grnd_level\":1009.58},\"wind\":{\"speed\":9.59,\"deg\":206.501},\"rain\":{\"3h\":12.41},
-        \"clouds\":{\"all\":92},\"dt\":1455396748,\"sys\":{\"message\":0.0097,\"country\":\"JP\",
-        \"sunrise\":1455312750,\"sunset\":1455351896},\"id\":1851632,\"name\":\"Shuzenji\",
-        \"cod\":200}";
-
-
-        let json = Json::from_str(&json).unwrap();
-        let weather = WeatherInfo::get_weather(json);
+        let weather = WeatherInfo::get_weather(get_json(false));
         assert!(weather.is_some());
     }
 
     //#[test]
     fn test_weather_forecast() {
-        let json = " {\"city\":{\"id\":1851632,\"name\":\"Shuzenji\",\"coord\":{\"lon\":138.933334,
-        \"lat\":34.966671},\"country\":\"JP\",\"population\":0,\"sys\":{\"population\":0}},
-        \"cod\":\"200\",\"message\":0.0056,\"cnt\":40,\"list\":[{\"dt\":1455408000,\"main\":{
-        \"temp\":285.62,\"temp_min\":284.269,\"temp_max\":285.62,\"pressure\":920.42,
-        \"sea_level\":1014.58,\"grnd_level\":920.42,\"humidity\":98,\"temp_kf\":1.35},
-        \"weather\":[{\"id\":501,\"main\":\"Rain\",\"description\":\"moderate rain\",
-        \"icon\":\"10d\"}],\"clouds\":{\"all\":44},\"wind\":{\"speed\":0.83,\"deg\":200.5},
-        \"rain\":{\"3h\":8.44},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 00:00:00\"},
-        {\"dt\":1455418800,\"main\":{\"temp\":289.44,\"temp_min\":288.168,\"temp_max\":289.44,
-        \"pressure\":918.51,\"sea_level\":1012.27,\"grnd_level\":918.51,\"humidity\":81,
-        \"temp_kf\":1.27},\"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",
-        \"icon\":\"10d\"}],\"clouds\":{\"all\":0},\"wind\":{\"speed\":1.89,\"deg\":242.002},
-        \"rain\":{\"3h\":0.175},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 03:00:00\"},
-        {\"dt\":1455429600,\"main\":{\"temp\":288.45,\"temp_min\":287.246,\"temp_max\":288.45,
-        \"pressure\":917.46,\"sea_level\":1011.19,\"grnd_level\":917.46,\"humidity\":68,
-        \"temp_kf\":1.2},\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"sky is clear\",
-        \"icon\":\"01d\"}],\"clouds\":{\"all\":0},\"wind\":{\"speed\":2.5,\"deg\":249.501},\"rain\":{},
-        \"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 06:00:00\"},{\"dt\":1455440400,
-        \"main\":{\"temp\":267.159,\"temp_min\":267.159,\"temp_max\":267.159,\"pressure\":940.32,
-        \"sea_level\":1040.37,\"grnd_level\":940.32,\"humidity\":77,\"temp_kf\":0},
-        \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",
-        \"icon\":\"04n\"}],\"clouds\":{\"all\":64},\"wind\":{\"speed\":1.06,\"deg\":229.5},\"rain\":{},
-        \"snow\":{},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-18 18:00:00\"},{\"dt\":1455829200,
-        \"main\":{\"temp\":269.084,\"temp_min\":269.084,\"temp_max\":269.084,\"pressure\":939.91,
-        \"sea_level\":1039.86,\"grnd_level\":939.91,\"humidity\":77,\"temp_kf\":0},\"weather\":[{\"id\":500,
-        \"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],\"clouds\":{\"all\":0},
-        \"wind\":{\"speed\":1.31,\"deg\":232.5},\"rain\":{\"3h\":0.0025},\"snow\":{},
-        \"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-18 21:00:00\"}]}";
-
-        let json = Json::from_str(&json).unwrap();
-        let weather = WeatherInfo::get_weather(json);
+        let weather = WeatherInfo::get_weather(get_json(true));
         assert!(weather.is_some());
         println!("{:?}", weather); 
         println!("{:?}", "fdfdfdfdfd"); 
-        let weather = weather.unwrap();
+        //let weather = weather.unwrap();
         //assert!(285.62, weather.temp);
+    }
+
+    fn get_json(forecast: bool) -> Json {
+        let json = match forecast {
+            true => {
+                "{\"city\":{\"id\":1851632,\"name\":\"Shuzenji\",\"coord\":{\"lon\":138.933334,
+                \"lat\":34.966671},\"country\":\"JP\",\"population\":0,\"sys\":{\"population\":0}},
+                \"cod\":\"200\",\"message\":0.0056,\"cnt\":40,\"list\":[{\"dt\":1455408000,\"main\":{
+                \"temp\":285.62,\"temp_min\":284.269,\"temp_max\":285.62,\"pressure\":920.42,
+                \"sea_level\":1014.58,\"grnd_level\":920.42,\"humidity\":98,\"temp_kf\":1.35},
+                \"weather\":[{\"id\":501,\"main\":\"Rain\",\"description\":\"moderate rain\",
+                \"icon\":\"10d\"}],\"clouds\":{\"all\":44},\"wind\":{\"speed\":0.83,\"deg\":200.5},
+                \"rain\":{\"3h\":8.44},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 00:00:00\"},
+                {\"dt\":1455418800,\"main\":{\"temp\":289.44,\"temp_min\":288.168,\"temp_max\":289.44,
+                \"pressure\":918.51,\"sea_level\":1012.27,\"grnd_level\":918.51,\"humidity\":81,
+                \"temp_kf\":1.27},\"weather\":[{\"id\":500,\"main\":\"Rain\",\"description\":\"light rain\",
+                \"icon\":\"10d\"}],\"clouds\":{\"all\":0},\"wind\":{\"speed\":1.89,\"deg\":242.002},
+                \"rain\":{\"3h\":0.175},\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 03:00:00\"},
+                {\"dt\":1455429600,\"main\":{\"temp\":288.45,\"temp_min\":287.246,\"temp_max\":288.45,
+                \"pressure\":917.46,\"sea_level\":1011.19,\"grnd_level\":917.46,\"humidity\":68,
+                \"temp_kf\":1.2},\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"sky is clear\",
+                \"icon\":\"01d\"}],\"clouds\":{\"all\":0},\"wind\":{\"speed\":2.5,\"deg\":249.501},\"rain\":{},
+                \"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2016-02-14 06:00:00\"},{\"dt\":1455440400,
+                \"main\":{\"temp\":267.159,\"temp_min\":267.159,\"temp_max\":267.159,\"pressure\":940.32,
+                \"sea_level\":1040.37,\"grnd_level\":940.32,\"humidity\":77,\"temp_kf\":0},
+                \"weather\":[{\"id\":803,\"main\":\"Clouds\",\"description\":\"broken clouds\",
+                \"icon\":\"04n\"}],\"clouds\":{\"all\":64},\"wind\":{\"speed\":1.06,\"deg\":229.5},\"rain\":{},
+                \"snow\":{},\"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-18 18:00:00\"},{\"dt\":1455829200,
+                \"main\":{\"temp\":269.084,\"temp_min\":269.084,\"temp_max\":269.084,\"pressure\":939.91,
+                \"sea_level\":1039.86,\"grnd_level\":939.91,\"humidity\":77,\"temp_kf\":0},\"weather\":[{\"id\":500,
+                \"main\":\"Rain\",\"description\":\"light rain\",\"icon\":\"10n\"}],\"clouds\":{\"all\":0},
+                \"wind\":{\"speed\":1.31,\"deg\":232.5},\"rain\":{\"3h\":0.0025},\"snow\":{},
+                \"sys\":{\"pod\":\"n\"},\"dt_txt\":\"2016-02-18 21:00:00\"}]}".to_string()
+            }
+            false => {
+                "{\"coord\":{\"lon\":138.93,\"lat\":34.97},\"weather\":[{\"id\":502,
+                \"main\":\"Rain\",\"description\":\"heavy intensity rain\",\"icon\":\"10n\"}],
+                \"base\":\"cmc stations\",\"main\":{\"temp\":288.555,\"pressure\":1009.58,
+                \"humidity\":95,\"temp_min\":288.555,\"temp_max\":288.555,\"sea_level\":1018.89,
+                \"grnd_level\":1009.58},\"wind\":{\"speed\":9.59,\"deg\":206.501},\"rain\":{\"3h\":12.41},
+                \"clouds\":{\"all\":92},\"dt\":1455396748,\"sys\":{\"message\":0.0097,\"country\":\"JP\",
+                \"sunrise\":1455312750,\"sunset\":1455351896},\"id\":1851632,\"name\":\"Shuzenji\",
+                \"cod\":200}".to_string()
+            }
+        };
+        Json::from_str(&json).unwrap()
     }
 }

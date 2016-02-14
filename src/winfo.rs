@@ -25,7 +25,7 @@ pub struct City {
     coord: Coord,
 }
 
-#[derive(Debug, RustcDecodable, RustcEncodable)]
+#[derive(Debug)]
 pub struct Coord {
     lat: f64,
     lng: f64,
@@ -50,7 +50,7 @@ pub struct Weather{
     wind: Wind
 }
 
-#[derive(Debug, RustcDecodable, RustcEncodable)]
+#[derive(Debug)]
 pub struct Wind {
     speed: f64,
     degree: f64
@@ -58,14 +58,9 @@ pub struct Wind {
 
 impl From<String> for WeatherInfo {
     fn from(json: String) -> Self {
-        let data = Json::from_str(&json).unwrap();
-        WeatherInfo::get_city(data.clone());
-
-        
         WeatherInfo {
             dummy: 5,
         }
-
     }
 }
 
@@ -161,7 +156,6 @@ impl WeatherInfo {
                 .and_then(|name| name.as_string().map(|i| i.to_string()))
             }
         }
-    
     }
 
     fn get_weather(data_root: Json) -> Option<Weather> {
@@ -171,7 +165,6 @@ impl WeatherInfo {
             Some(n) => return None, //WeatherInfo::get_weather_forecast(n),
             None =>  WeatherInfo::get_weather_normal(root_obj),
         }
-
     }
 
     fn get_weather_normal(data_root: &BTreeMap<String, Json>) -> Option<Weather> {
@@ -204,7 +197,7 @@ impl WeatherInfo {
             .and_then(|grnd_level| grnd_level.as_f64())
             .unwrap();
         if let Some(wind) = WeatherInfo::get_wind(data_root) {
-            Some(Weather {
+            let weather = Weather {
                 description: description,
                 temp: temp,
                 humidity: humidity,
@@ -213,7 +206,8 @@ impl WeatherInfo {
                 grnd_level: grnd_level,
                 when: time,
                 wind: wind,
-            })
+            };
+            Some(weather)
         } else {
             None
         }
@@ -263,8 +257,6 @@ mod tests {
             .and_then(|root| root.get("list"))
             .and_then(|list| list.as_array()).unwrap().into_iter().next()
             .and_then(|json| json.as_object());
-            //.and_then(|entry| entry.get("main"))
-            //.and_then(|main| main.as_object());
 
         assert!(json.is_some());
         
@@ -278,7 +270,6 @@ mod tests {
         let country= WeatherInfo::get_country(get_json(false));
         assert!(country.is_some());
         assert_eq!("JP", country.unwrap()) 
-
     }
 
     #[test]

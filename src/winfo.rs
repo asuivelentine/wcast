@@ -158,16 +158,52 @@ impl WeatherInfo {
         }
     }
 
-    fn get_weather(data_root: Json) -> Option<Weather> {
+    fn get_Day(data_root: Json) -> Option<Day> {
         let root_obj = data_root.as_object().unwrap();
+        let mut sunset = None;
+        let mut sunrise = None;
         
-        match root_obj.get("list") {
-            Some(n) => return None, //WeatherInfo::get_weather_forecast(n),
-            None =>  WeatherInfo::get_weather_normal(root_obj),
-        }
+        let weather = match root_obj.get("list") {
+            Some(n) => {
+               let list = n.as_array().unwrap().into_iter();
+               let mut w = Vec::new();
+               for x in list.map(|item| item.as_object()) {
+                   if let Some(main) = x {
+                       if let Some(x)  = WeatherInfo::get_weather(main){
+                            w.push(x);
+                       }
+                   }
+
+               }
+               w
+            }
+            None => {
+                let mut weather = Vec::new();
+                if let Some(w) = WeatherInfo::get_weather(root_obj){
+                    weather.push(w);
+                }
+
+                let sys = root_obj.get("sys")
+                    .and_then(|sys| sys.as_object()).unwrap();
+                sunset = sys.get("sunset")
+                    .and_then(|sunset| sunset.as_u64());
+                sunrise = sys.get("sunrise")
+                    .and_then(|sunrise| sunrise.as_u64());
+
+                weather
+            }
+        };
+
+        let day = Day {
+            sunset: sunset,
+            sunrise: sunrise,
+            weather: weather,
+        };
+
+        Some(day)
     }
 
-    fn get_weather_normal(data_root: &BTreeMap<String, Json>) -> Option<Weather> {
+    fn get_weather(data_root: &BTreeMap<String, Json>) -> Option<Weather> {
         let time = data_root.get("dt").and_then(|time| time.as_u64()).unwrap();
         let weather = data_root.get("main").and_then(|main| main.as_object()).unwrap();
 
@@ -212,11 +248,6 @@ impl WeatherInfo {
             None
         }
     }
-
-    /*fn get_weather_forecast(list: &Json) -> Option<Weather> {
-
-    }
-    */
 
     fn get_city(data_root: Json) -> Option<City> {
         let name = WeatherInfo::get_name(data_root.clone());
@@ -351,18 +382,47 @@ mod tests {
 
     #[test]
     fn test_weather_normal() {
-        let weather = WeatherInfo::get_weather(get_json(false));
+        let weather = WeatherInfo::get_weather(get_json(false).as_object().unwrap());
         assert!(weather.is_some());
     }
 
-    //#[test]
+    #[test]
     fn test_weather_forecast() {
-        let weather = WeatherInfo::get_weather(get_json(true));
-        assert!(weather.is_some());
-        println!("{:?}", weather); 
-        println!("{:?}", "fdfdfdfdfd"); 
-        //let weather = weather.unwrap();
-        //assert!(285.62, weather.temp);
+        let weather = get_json(true);
+        let mut count = 0;
+        let weather = weather.as_object()
+            .and_then(|obj| obj.get("list"))
+            .and_then(|list| list.as_array()).unwrap().into_iter();
+
+        for x in weather {
+            let item = WeatherInfo::get_weather(x.as_object().unwrap());
+            assert!(item.is_some());
+            count += 1;
+        }
+        assert_eq!(5, count);
+    }
+
+    #[test]
+    fn test_day_normal() {
+        let json = get_json(false);
+        let day = WeatherInfo::get_Day(json);
+        assert!(day.is_some());
+        let day = day.unwrap();
+        assert!(day.sunset.is_some());
+        assert!(day.sunrise.is_some());
+        assert_eq!(1455312750, day.sunrise.unwrap());
+        assert_eq!(1455351896, day.sunset.unwrap());
+    }
+
+    #[test]
+    fn test_day_forecast() {
+        let json = get_json(true);
+        let day = WeatherInfo::get_Day(json);
+        assert!(day.is_some());
+        let day = day.unwrap();
+        assert_eq!(5, day.weather.len());
+        assert!(day.sunset.is_none());
+        assert!(day.sunrise.is_none());
     }
 
     fn get_json(forecast: bool) -> Json {

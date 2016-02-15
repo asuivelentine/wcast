@@ -270,7 +270,7 @@ mod tests {
     use super::WeatherInfo;
 
     #[test]
-    fn test_wind() {
+    fn test_wind_current() {
         let wind = WeatherInfo::get_wind(get_json(false).as_object().unwrap());
         assert!(wind.is_some());
         let wind = wind.unwrap();
@@ -297,7 +297,7 @@ mod tests {
 
 
     #[test]
-    fn test_country() {
+    fn test_country_current() {
         let country= WeatherInfo::get_country(get_json(false));
         assert!(country.is_some());
         assert_eq!("JP", country.unwrap()) 
@@ -312,7 +312,7 @@ mod tests {
     }
 
     #[test]
-    fn test_city() {
+    fn test_city_current() {
         let city= WeatherInfo::get_city(get_json(false));
 
         assert!(city.is_some());
@@ -341,7 +341,7 @@ mod tests {
 
 
     #[test]
-    fn test_coord() {
+    fn test_coord_current() {
         let coord = WeatherInfo::get_coords(get_json(false));
         assert!(coord.is_some());
         /*
@@ -363,7 +363,7 @@ mod tests {
     }
 
     #[test]
-    fn test_name() {
+    fn test_name_current() {
         let name = WeatherInfo::get_coords(get_json(false));
         assert!(name.is_some());
         /*
@@ -381,7 +381,7 @@ mod tests {
     }
 
     #[test]
-    fn test_weather_normal() {
+    fn test_weather_current() {
         let weather = WeatherInfo::get_weather(get_json(false).as_object().unwrap());
         assert!(weather.is_some());
     }
@@ -403,7 +403,7 @@ mod tests {
     }
 
     #[test]
-    fn test_day_normal() {
+    fn test_day_current() {
         let json = get_json(false);
         let day = WeatherInfo::get_Day(json);
         assert!(day.is_some());

@@ -57,12 +57,23 @@ impl WeatherInfo {
     fn new(json_root: Json) -> WeatherInfo {
         let weather = WeatherInfo::get_weather_list(json_root.clone());
         let city = WeatherInfo::get_city(json_root.clone());
+        let sun = WeatherInfo::get_sun(json_root.clone());
         
+        let sunset: Option<Time> = match sun {
+            Some(n) => Some(n.0),
+            None => None,
+        };
+
+        let sunrise: Option<Time> = match sun {
+            Some(n) => Some(n.1),
+            None => None,
+        };
+
         WeatherInfo {
             city: city,
-            sunset: None,
+            sunset: sunset,
             weather: weather,
-            sunrise: None,
+            sunrise: sunrise,
         }
     }
 

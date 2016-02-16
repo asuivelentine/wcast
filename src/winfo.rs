@@ -184,6 +184,29 @@ impl WeatherInfo {
         Some(weather)
     }
 
+    fn get_sun(data_root: Json) -> Option<(Time, Time)> {
+        let root_obj = data_root.as_object().unwrap();
+
+        let sys = root_obj.get("sys")
+            .and_then(|sys| sys.as_object());
+
+        if sys.is_none() {
+            return None;
+        }
+
+        let sys = sys.unwrap();
+        let sunset = sys.get("sunset")
+            .and_then(|sunset| sunset.as_u64());
+        let sunrise = sys.get("sunrise")
+            .and_then(|sunrise| sunrise.as_u64());
+
+        if sunset.is_none() | sunrise.is_none() {
+            return None;
+        }
+
+        Some((sunset.unwrap(), sunrise.unwrap()))
+    }
+
     fn get_weather(data_root: &BTreeMap<String, Json>) -> Option<Weather> {
         let time = data_root.get("dt").and_then(|time| time.as_u64()).unwrap();
         let weather = data_root.get("main").and_then(|main| main.as_object()).unwrap();
@@ -381,6 +404,25 @@ mod tests {
             count += 1;
         }
         assert_eq!(5, count);
+    }
+
+    #[test]
+    fn test_sun_current() {
+        let json = get_json(false);
+        let sun = WeatherInfo::get_sun(json);
+        assert!(sun.is_some());
+        //sunrise
+        assert_eq!(1455312750, sun.unwrap().1);
+        //sunset
+        assert_eq!(1455351896, sun.unwrap().0);
+    }
+
+    #[test]
+    fn test_sun_forecst() {
+        let json = get_json(true);
+        let sun = WeatherInfo::get_sun(json);
+        println!("{:?}", sun);
+        assert!(sun.is_none());
     }
 
     #[test]

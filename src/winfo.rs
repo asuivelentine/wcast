@@ -159,7 +159,7 @@ impl WeatherInfo {
         }
     }
 
-    fn get_Day(data_root: Json) -> Option<Day> {
+    fn get_single_day(data_root: Json) -> Option<Day> {
         let root_obj = data_root.as_object().unwrap();
         let mut sunset = None;
         let mut sunrise = None;
@@ -404,7 +404,7 @@ mod tests {
     }
 
     #[test]
-    fn test_day_current() {
+    fn test_single_day_current() {
         let json = get_json(false);
         let day = WeatherInfo::get_Day(json);
         assert!(day.is_some());
@@ -416,7 +416,7 @@ mod tests {
     }
 
     #[test]
-    fn test_day_forecast() {
+    fn test_signle_day_forecast() {
         let json = get_json(true);
         let day = WeatherInfo::get_Day(json);
         assert!(day.is_some());

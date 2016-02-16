@@ -166,7 +166,6 @@ impl WeatherInfo {
         
         let weather = match root_obj.get("list") {
             Some(n) => {
-               let list = n.as_array().unwrap().into_iter();
                let mut w = Vec::new();
                for x in list.map(|item| item.as_object()) {
                    if let Some(main) = x {
@@ -202,6 +201,22 @@ impl WeatherInfo {
         };
 
         Some(day)
+    }
+
+    fn get_days(data_root: json) -> Option<Vec<Day>> {
+        let root_obj = data_root.as_object().unwrap();
+        let days = Vec::new();
+        
+        let weather = match root_obj.get("list") {
+            Some(n) => {
+               let list = n.as_array().unwrap().into_iter();
+               for timespan in list.map(|time| time.as_object().get("dt"))  { //check for days
+                 
+               }
+            },
+            None => None,
+        };
+        None
     }
 
     fn get_weather(data_root: &BTreeMap<String, Json>) -> Option<Weather> {

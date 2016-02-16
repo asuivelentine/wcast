@@ -426,6 +426,25 @@ mod tests {
         assert!(day.sunrise.is_none());
     }
 
+    #[test]
+    fn get_days_current() {
+        let json = get_json(false);
+        let days = get_days(json);
+        assert!(days.is_some());
+        let days = days.unwrap();
+        assert_eq!(1 , days.len());
+    }
+
+    fn get_days_forecast() {
+        let json = get_json(true);
+        let days = WeatherInfo::get_days(json);
+        assert!(days.is_some());
+        let days = days.unwrap();
+        assert_eq!(2, days.len());
+    }
+
+
+
     fn get_json(forecast: bool) -> Json {
         let json = match forecast {
             true => {

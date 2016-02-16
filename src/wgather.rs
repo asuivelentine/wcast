@@ -22,18 +22,32 @@ pub struct WGError {
     cause: Option<Box<::std::error::Error>>,
 }
 
+///The initial information that is needed for any request
 #[derive(Debug)]
 pub struct WeatherGather {
     api_key: String,
 }
 
 impl WeatherGather {
+    ///Generate a new Object of WeatherGather.
+    ///This is needed for every request you want to send
     pub fn new(apikey: String) -> WeatherGather {
         WeatherGather {
             api_key: apikey,
         }
     }
 
+    ///Generates a new WeatherGetter Object to configure
+    ///the details of your request.
+    ///
+    ///the Default configuration is:
+    /// - coordinates: Berlin
+    /// - language: en
+    /// - forecast: false
+    /// - Unit: Celsius
+    ///
+    /// You can override tne default behavior using the implementation
+    /// of WeatherGetter
     pub fn get_weather(&self) -> WeatherGetter {
         WeatherGetter {
             li: LocationInformation::from_coords(52.5243700, 13.4105300),
@@ -44,7 +58,7 @@ impl WeatherGather {
     }
 }
 
-
+///Configure the functionality your request 
 #[derive(Debug)]
 pub struct WeatherGetter {
     li: LocationInformation,
@@ -120,7 +134,11 @@ impl WeatherGetter {
     }
 }
 
-
+///You can request the specific weather for different places by coord, city, zip
+///
+///- Coords: specify latitude and longitude
+///- City: specify the place by city- and countryname
+///- Zip: by zip-code + countryname
 #[derive(Debug)]
 pub enum LocationInformation {
     Coord { lat: f64, lng: f64},

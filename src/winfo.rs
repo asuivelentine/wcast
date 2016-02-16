@@ -7,6 +7,7 @@ use rustc_serialize::json::{ Json };
 pub type Time = u64;
 
 //temporary, until the real json data is parsed...
+///This is the result of the weather request
 #[derive(Debug)]
 pub struct WeatherInfo {
     dummy: isize,
@@ -14,8 +15,8 @@ pub struct WeatherInfo {
 
 #[derive(Debug)]
 pub struct WeatherInfo2 {
-    city: City,
-    day: Vec<Day>
+    pub city: City,
+    pub day: Vec<Day>
 }
    
 #[derive(Debug)]

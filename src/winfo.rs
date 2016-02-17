@@ -443,6 +443,21 @@ mod tests {
         assert!(weather_data.city.is_some());
     }
 
+    #[test]
+    fn test_weather_list_current() {
+        let json = get_json(false);
+        let weather = WeatherInfo::get_weather_list(json);
+        assert!(weather.is_some());
+        assert_eq!(1, weather.unwrap().len());
+    }
+    
+    #[test]
+    fn test_weather_list_forecast() {
+        let json = get_json(true);
+        let weather = WeatherInfo::get_weather_list(json);
+        assert!(weather.is_some());
+        assert_eq!(5, weather.unwrap().len());
+    }
     fn get_json_string(as_forecast: bool) -> String {
         let current = 
             "{\"coord\":{\"lon\":138.93,\"lat\":34.97},\"weather\":[{\"id\":502,

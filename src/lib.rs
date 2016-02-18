@@ -16,8 +16,6 @@ mod winfo;
 ///You can use this module the configure the request to openWeatherMap
 pub mod wgather;
 
-pub use winfo::WeatherInfo;
-
 #[cfg(test)]
 mod test {
     #[test]

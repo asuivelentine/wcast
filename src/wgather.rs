@@ -41,7 +41,7 @@ pub struct WGError {
 /// ```
 #[derive(Debug)]
 pub struct WeatherGather {
-    api_key: String,
+    pub api_key: String,
 }
 
 impl WeatherGather {
@@ -82,7 +82,7 @@ impl WeatherGather {
     }
 }
 
-///Configure the functionality your request 
+///Configure the functionality your request and send it
 #[derive(Debug)]
 pub struct WeatherGetter {
     li: LocationInformation,

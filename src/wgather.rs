@@ -6,16 +6,21 @@ use winfo::WeatherInfo;
 use hyper::Client;
 use hyper::header::Connection;
 
+///currently not used
 pub type Result<T> = RResult<T, WGError>;
+///wrapper for String
 pub type Language = String;
+///wrapper for bool
 pub type Forecast = bool;
 
 
+///currently not used
 #[derive(Debug)]
 pub enum ErrorKind {
 
 }
 
+///currently not used
 #[derive(Debug)]
 pub struct WGError {
     kind: ErrorKind,
@@ -31,6 +36,14 @@ pub struct WeatherGather {
 impl WeatherGather {
     ///Generate a new Object of WeatherGather.
     ///This is needed for every request you want to send
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use wcast::wgather::WeatherGather;
+    ///
+    /// let gather = WeatherGather::new("APIKEY".to_string());
+    /// ```
     pub fn new(apikey: String) -> WeatherGather {
         WeatherGather {
             api_key: apikey,
@@ -67,6 +80,7 @@ pub struct WeatherGetter {
     wu: WeatherUnit,
 }
 
+///Specify the weather unit: Kelvin, Celsius and Fahrenheit are supported
 #[derive(Debug)]
 pub enum WeatherUnit {
     Kelvin,
@@ -75,27 +89,32 @@ pub enum WeatherUnit {
 }
 
 impl WeatherGetter {
+    ///specify for which location you want to get the weather data
     pub fn with_location(mut self, li: LocationInformation) -> WeatherGetter {
         self.li = li;
         self
     }
 
+    /// specify the language by country code e.g. en
     pub fn with_language(mut self, lang: Language) -> WeatherGetter {
         self.lang = lang;
         self
     }
 
+    ///specify the kind of request forecast or current
     pub fn with_forecast(mut self, forecast: Forecast) -> WeatherGetter {
         self.forecast = forecast;
         self
     }
 
+    ///specify the weather unit
     pub fn in_units(mut self, wu: WeatherUnit) -> WeatherGetter {               
         self.wu = wu;                                                           
         self                                                                    
     } 
 
-    pub fn get(self, wg: WeatherGather) -> Result<WeatherInfo> {
+    ///get the weather data.
+    pub fn get(self, wg: WeatherGather) -> Option<WeatherInfo> {
         let mut uri = match self.forecast {
             true => "http://api.openweathermap.org/data/2.5/forecast?".to_string(),
             false => "http://api.openweathermap.org/data/2.5/weather?".to_string(),
@@ -117,8 +136,11 @@ impl WeatherGetter {
         
 
         let json = WeatherGetter::fetch_weather_data(&uri);
-        let weather = WeatherInfo::from(json);
-        Ok(weather)
+        let weather = WeatherInfo::from_str(json);
+        match weather {
+            Some(weather) => Some(weather),
+            None => None,
+        }
     }
 
     fn fetch_weather_data(url: &str) -> String{
@@ -129,8 +151,10 @@ impl WeatherGetter {
             .send().unwrap();
 
         let mut body = String::new();
-        res.read_to_string(&mut body).unwrap();
-        body
+        match res.read_to_string(&mut body) {
+            Ok(_) => body,
+            Err(_) => "".to_string(),
+        }
     }
 }
 

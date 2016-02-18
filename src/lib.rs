@@ -11,6 +11,7 @@ extern crate rustc_serialize;
 extern crate hyper;
 
 mod winfo;
+
 ///This module is the interface of the library
 ///You can use this module the configure the request to openWeatherMap
 pub mod wgather;

@@ -1,5 +1,3 @@
-use std::convert::From;
-
 use std::collections::BTreeMap;
 
 use rustc_serialize::json::{ Json };
@@ -46,19 +44,20 @@ pub struct Wind {
     degree: f64
 }
 
-impl From<String> for WeatherInfo {
-    fn from(json: String) -> Self {
-        let json = Json::from_str(&json).unwrap();
-        WeatherInfo::new(json)
-    }
-}
-
 impl WeatherInfo {
+    pub fn from_str(json: String) -> Option<WeatherInfo> {
+        let json = Json::from_str(&json);
+        match json {
+            Ok(n) => Some(WeatherInfo::new(n)),
+            Err(_) => None,
+        }
+    }
+
     fn new(json_root: Json) -> WeatherInfo {
         let weather = WeatherInfo::get_weather_list(json_root.clone());
         let city = WeatherInfo::get_city(json_root.clone());
         let sun = WeatherInfo::get_sun(json_root.clone());
-        
+
         let sunset: Option<Time> = match sun {
             Some(n) => Some(n.0),
             None => None,
@@ -229,8 +228,6 @@ impl WeatherInfo {
             .and_then(|weather| weather.get("description"))
             .and_then(|description| description.as_string())
             .map(|des| des.to_string()).unwrap();
-
-        println!("{:?}", description);
 
         let temp = weather.get("temp")
             .and_then(|temp| temp.as_f64())
@@ -438,7 +435,9 @@ mod tests {
 
     #[test]
     fn test_from_str_current() {
-        let weather_data = WeatherInfo::from(get_json_string(false));
+        let weather_data = WeatherInfo::from_str(get_json_string(false));
+        assert!(weather_data.is_some());
+        let weather_data = weather_data.unwrap();
         assert!(weather_data.weather.is_some());
         assert!(weather_data.city.is_some());
     }
@@ -458,6 +457,7 @@ mod tests {
         assert!(weather.is_some());
         assert_eq!(5, weather.unwrap().len());
     }
+
     fn get_json_string(as_forecast: bool) -> String {
         let current = 
             "{\"coord\":{\"lon\":138.93,\"lat\":34.97},\"weather\":[{\"id\":502,

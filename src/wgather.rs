@@ -28,6 +28,17 @@ pub struct WGError {
 }
 
 ///The initial information that is needed for any request
+/// 
+/// ```
+/// use wcast::wgather::{ WeatherUnit, WeatherGather };
+///
+/// let gather = WeatherGather::new("APIKEY".to_string());
+/// let weather = gather.get_weather()
+///     .with_forecast(false)
+///     .with_language("en".to_string())
+///     .in_units(WeatherUnit::Fahrenheit)
+///     .get(gather);
+/// ```
 #[derive(Debug)]
 pub struct WeatherGather {
     api_key: String,

@@ -48,8 +48,6 @@ impl WeatherGather {
     ///Generate a new Object of WeatherGather.
     ///This is needed for every request you want to send
     ///
-    /// # Examples
-    ///
     /// ```
     /// use wcast::wgather::WeatherGather;
     ///
@@ -65,6 +63,7 @@ impl WeatherGather {
     ///the details of your request.
     ///
     ///the Default configuration is:
+    ///
     /// - coordinates: Berlin
     /// - language: en
     /// - forecast: false

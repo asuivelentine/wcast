@@ -218,8 +218,13 @@ impl WeatherInfo {
     }
 
     fn get_weather(data_root: &BTreeMap<String, Json>) -> Option<Weather> {
-        let time = data_root.get("dt").and_then(|time| time.as_u64()).unwrap();
-        let weather = data_root.get("main").and_then(|main| main.as_object()).unwrap();
+        let time = data_root.get("dt").and_then(|time| time.as_u64());
+        let weather = data_root.get("main").and_then(|main| main.as_object());
+
+        if time.is_none() || weather.is_none() {
+            return None;
+        }
+        let weather = weather.unwrap();
 
         let description = data_root.get("weather")
             .and_then(|weather| weather.as_array()).unwrap();
@@ -252,7 +257,7 @@ impl WeatherInfo {
                 pressure: pressure,
                 sea_level: sea_level,
                 grnd_level: grnd_level,
-                when: time,
+                when: time.unwrap(),
                 wind: wind,
             };
             Some(weather)
@@ -265,6 +270,10 @@ impl WeatherInfo {
         let name = WeatherInfo::get_name(data_root.clone());
         let country = WeatherInfo::get_country(data_root.clone());
         let coord = WeatherInfo::get_coords(data_root.clone());
+
+        if name.is_none() || country.is_none() || coord.is_none() {
+            return None;
+        }
 
         let city = City {
             name: name.unwrap(),
